@@ -5,8 +5,11 @@
  */
 package proyectobase2;
 
+
 import Conexion.Queries;
+import dao.*;
 import java.sql.SQLException;
+import tablas.*;
 
 /**
  *
@@ -18,8 +21,11 @@ public class ProyectoBase2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException {
-        Queries qs = new Queries();
-        System.out.println(qs.getPersonas());
+        FactoryDao factory = FactoryDao.getFactory();
+        Queries q = new Queries();
+        PersonaDao cdao = factory.getPersonaDao();
+         System.out.println(q.getFecha());
+        
     }
     
 }

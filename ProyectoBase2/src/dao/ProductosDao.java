@@ -6,7 +6,7 @@
 package dao;
 
 import java.util.List;
-import tablas.Productos;
+import tablas.Producto;
 
 /**
  *
@@ -14,11 +14,11 @@ import tablas.Productos;
  */
 public abstract class ProductosDao {
     
-    public abstract Productos get(String id);
+    public abstract Producto get(String id);
 
-    public abstract List<Productos> get();
+    public abstract List<Producto> get();
 
-    public abstract void save(Productos p);
+    public abstract void save(Producto p);
 
     public abstract void delete(String id);
 }

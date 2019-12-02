@@ -5,9 +5,11 @@
  */
 package dao;
 
+import queriesDao.ClientesPsDao;
 import queriesDao.PaquetesPsDao;
 import queriesDao.PersonaPsDao;
 import queriesDao.ProductosPsDao;
+import queriesDao.SucursalesPsDao;
 
 /**
  *
@@ -25,8 +27,24 @@ public class FactoryPsDao extends FactoryDao{
         return new PaquetesPsDao();
     }
     
+    @Override
     public ProductosDao getProductosDao(){
         return new ProductosPsDao();
+    }
+
+    @Override
+    public SucursalesDao getSucursalesDao() {
+        return new SucursalesPsDao();
+    }
+
+    @Override
+    public ClientesDao getClientesDao() {
+        return new ClientesPsDao();
+    }
+
+    @Override
+    public EmpleadosDao getEmpleadosDao() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

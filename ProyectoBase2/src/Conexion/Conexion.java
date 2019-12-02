@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @author eduardobaldivieso
  */
 public class Conexion {
-    private final String url = "jdbc:postgresql://database.ddns.net:5432/gym_de_cania?user=gymdata&password=nur123&useSSL=false&allowPublicKeyRetrieval=true";
+    private final String url = "jdbc:postgresql://localhost:5432/gym_de_cania?user=postgres&password=1234&useSSL=false&allowPublicKeyRetrieval=true";
     private Connection conn ;
     
     private static Conexion singleCon = null;

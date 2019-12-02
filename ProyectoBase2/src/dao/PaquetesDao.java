@@ -6,7 +6,7 @@
 package dao;
 
 import java.util.List;
-import tablas.Paquetes;
+import tablas.Paquete;
 
 /**
  *
@@ -14,11 +14,11 @@ import tablas.Paquetes;
  */
 public abstract class PaquetesDao {
 
-    public abstract Paquetes get(String id);
+    public abstract Paquete get(String id);
 
-    public abstract List<Paquetes> get();
+    public abstract List<Paquete> get();
 
-    public abstract void save(Paquetes p);
+    public abstract void save(Paquete p);
 
     public abstract void delete(String id);
 }
