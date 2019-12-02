@@ -5,16 +5,20 @@
  */
 package dao;
 
+import java.util.List;
+import tablas.Sucursal;
+
 /**
  *
  * @author eduardobaldivieso
  */
-public class SucursalesDao {
-     public abstract Persona get(String id);
+public abstract class SucursalesDao {
+    
+    public abstract Sucursal get(int id);
 
-    public abstract List<Persona> get();
+    public abstract List<Sucursal> get();
 
-    public abstract void save(Persona p);
+    public abstract void save(Sucursal s);
 
-    public abstract void delete(String id);
+    public abstract void delete(int id);
 }

@@ -9,20 +9,21 @@ package tablas;
  *
  * @author eduardobaldivieso
  */
-public class Sucursal {
+public class Producto {
     private int codigo;
     private String nombre;
-    private String direccion;
+    private float precio;
 
-    public Sucursal() {
-    }
-
-    public Sucursal(int codigo, String nombre, String direccion) {
+    public Producto(int codigo, String nombre, float precio) {
         this.codigo = codigo;
         this.nombre = nombre;
-        this.direccion = direccion;
+        this.precio = precio;
     }
 
+    public Producto() {
+    }
+    
+    
     public int getCodigo() {
         return codigo;
     }
@@ -39,12 +40,12 @@ public class Sucursal {
         this.nombre = nombre;
     }
 
-    public String getDireccion() {
-        return direccion;
+    public float getPrecio() {
+        return precio;
     }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
+    public void setPrecio(float precio) {
+        this.precio = precio;
     }
     
     

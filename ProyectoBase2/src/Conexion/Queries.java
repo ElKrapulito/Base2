@@ -16,14 +16,14 @@ import java.sql.Statement;
  * @author eduardobaldivieso
  */
 public class Queries {
-    public String getPersonas() throws SQLException{
+    public String getFecha() throws SQLException{
         Conexion ps = Conexion.getOrCreate();
         Connection conn = ps.getConn();
         Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from personas");
+        ResultSet rs = stmt.executeQuery("select now()");
         String rest = "";
-        while(rs.next()){
-            rest += rs.getString("nombre") + " "; 
+        if(rs.next()){
+            rest += rs.getDate(1); 
         }
         return rest;
     }

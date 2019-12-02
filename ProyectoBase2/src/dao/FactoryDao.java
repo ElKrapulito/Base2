@@ -16,4 +16,8 @@ public abstract class FactoryDao {
 
     public abstract PersonaDao getPersonaDao();
     public abstract PaquetesDao getPaquetesDao();
+    public abstract ProductosDao getProductosDao();
+    public abstract SucursalesDao getSucursalesDao();
+    public abstract ClientesDao getClientesDao();
+    public abstract EmpleadosDao getEmpleadosDao();
 }
