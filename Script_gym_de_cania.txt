@@ -53,7 +53,7 @@ CREATE TABLE productos_sucursales(
     producto_id INT NOT NULL,
     cantidad INT NOT NULL,
     fecha DATE NOT NULL
-)
+);
 
 ALTER TABLE productos_sucursales ADD PRIMARY KEY (sucursal_id,producto_id);
 ALTER TABLE productos_sucursales ADD FOREIGN KEY (sucursal_id) REFERENCES sucursales(codigo_id);
@@ -87,7 +87,7 @@ ALTER TABLE paquetes_sucursales_disciplinas ADD FOREIGN KEY (disciplina_id) REFE
 
 CREATE TABLE venta_producto(
     codigo_id BIGSERIAL PRIMARY KEY,
-    producto_id VARCHAR(30) NOT NULL,
+    producto_id INT NOT NULL,
     persona_id VARCHAR(30),
     f_hora TIMESTAMP NOT NULL,
     sucursal_id INT NOT NULL
@@ -122,7 +122,7 @@ ALTER TABLE entrada_salida_cliente ADD FOREIGN KEY (sucursal_id) REFERENCES sucu
 
 CREATE TABLE reserva_producto(
     persona_id VARCHAR(30) NOT NULL,
-    producto_id VARCHAR(30) NOT NULL,
+    producto_id INT NOT NULL,
     sucursal_id INT NOT NULL,
     f_reserva TIMESTAMP NOT NULL,
     f_limite TIMESTAMP
@@ -253,48 +253,108 @@ JOIN productos pr ON ps.producto_id = pr.codigo_id,
 sucursales s WHERE ps.sucursal_id = s.codigo_id
 GROUP BY s.nombre) as RE;
 
+--Funcion Para genrar codigo
+	create or replace function generar_codigo(carnet text, nombre text, apellido1 text)
+	RETURNS text LANGUAGE plpgsql AS
+	$$
+	declare
+		codigo varchar(50);
+	BEGIN
+	
+ 		codigo := carnet ||
+		'-' || substring(nombre,1,1)|| substring(apellido1,1,1);
+		return codigo;
+	END;
+	$$
+	LANGUAGE plpgsql;
+end;
+
+	
+-- funcion para generar contraseña
+create or replace function generar_pass(fecha_nac date, nombre text, apellido text)
+	RETURNS text AS
+	$$
+	declare
+		codigo varchar(50);
+	BEGIN
+ 		codigo := split_part(fecha_nac::text, '-', 2)||split_part(fecha_nac::text, '-', 3) ||
+		'-' || substring(nombre,1,1)|| substring(apellido,1,1);
+		return codigo;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+	--Primera crear la funcion que esta abajo para generar el codigo
+create or replace function generar_empleado(fecha_nac date, snombre text, sapellido text,
+		 carnet text,surcusal int,labor text,Salario decimal(9,2))
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;
+			update personas set contra = pass where codigo_id = codigo;
+			
+			update empleados set salario = Salario, desc_labor = labor,sucursal_id = sucursal;
+		else
+			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, pass);	
+	        insert into empleados values(codigo,Salario,labor,surcusal);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+-- insertar o actualizar cliente
+    create or replace function ins_upd_persona(fecha_nac date, snombre text, sapellido text,
+		carnet text,surcusal int,permitido boolean)
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		pass :=(select generar_pass(fecha_nac,snombre,sapellido))::text;
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;
+			update personas set contra = pass where codigo_id = codigo;
+		else
+			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, pass);	
+	        insert into clientes values(codigo,now()::date,surcusal,Permitido);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+
+-- Crear una clave encriptada
+CREATE OR REPLACE FUNCTION encriptar_pass(pass text)
+RETURNS text LANGUAGE plpgsql AS
+$$
+BEGIN
+	RETURN crypt(pass, gen_salt('md5'));
+END;
+$$
+-- Verificar la clave con el nombre de usuario
+CREATE OR REPLACE FUNCTION autenticar_user(usuario text, pass text)
+RETURNS boolean LANGUAGE plpgsql AS
+$$
+BEGIN
+	RETURN (contra = crypt(pass, contra)) AS pswmatch FROM personas WHERE n_usuario = usuario; 
+END;
+$$
+
  
-
--- consulta de sucursales con sus paquetes y horarios
--- funciona con horarios corregidos! 
- "[{"nombre":"Gym de Caña 3","direccion":"Piso 3","paquetes":[{"nombre":"Mega VIP","disciplinas":[{"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Natacion", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Kick Boxing", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}, {"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Zumba", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}, {"nombre" : "Futbol", "horario" : null}, {"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Kick Boxing", "horario" : null}, {"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}]}]}, 
- {"nombre":"Gym de Caña 1","direccion":"Por ahi","paquetes":[{"nombre":"Mega VIP","disciplinas":[{"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Natacion", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Kick Boxing", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}, {"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Zumba", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}, {"nombre" : "Futbol", "horario" : null}, {"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Kick Boxing", "horario" : null}, {"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}]}]}, 
- {"nombre":"Gym de Caña 2","direccion":"En la esquina","paquetes":[{"nombre":"Mega VIP","disciplinas":[{"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Natacion", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Kick Boxing", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Boxeo", "horario" : null}, {"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Zumba", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Calistenia", "horario" : null}]}, 
- {"nombre":"Mega VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}, {"nombre" : "Futbol", "horario" : null}, {"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Kick Boxing", "horario" : null}, {"nombre" : "Boxeo", "horario" : null}]}, 
- {"nombre":"Super VIP","disciplinas":[{"nombre" : "Crossfit", "horario" : null}]}, 
- {"nombre":"Ultra VIP","disciplinas":[{"nombre" : "Taekwondo", "horario" : null}, {"nombre" : "Calistenia", "horario" : null}, {"nombre" : "Futbol", "horario" : null}]}, 
- {"nombre":"VIP","disciplinas":[{"nombre" : "Natacion", "horario" : null}]}]}]"
-
-
-"[{"nombre":"Gym de Caña 1","paquetes":[{"nombre" : "Guante Box 16oz", "cantidad" : 12, "precio" : 300.00, "fecha" : "2019-11-28"}, {"nombre" : "WHEY protein Vainilla", "cantidad" : 23, "precio" : 130.00, "fecha" : "2019-11-28"}, {"nombre" : "Zapatos adidas", "cantidad" : 56, "precio" : 300.00, "fecha" : "2019-11-28"}, {"nombre" : "GNAR PUMP House Music", "cantidad" : 30, "precio" : 100.00, "fecha" : "2019-11-28"}, {"nombre" : "WHEY protein Cookies and Cream", "cantidad" : 10, "precio" : 200.00, "fecha" : "2019-11-28"}, {"nombre" : "Esteroides", "cantidad" : 36, "precio" : 1050.00, "fecha" : "2019-11-28"}, {"nombre" : "Zapatos pumas", "cantidad" : 12, "precio" : 500.00, "fecha" : "2019-11-28"}]}, 
- {"nombre":"Gym de Caña 2","paquetes":[{"nombre" : "Guante Box 14oz", "cantidad" : 5, "precio" : 230.00, "fecha" : "2019-11-28"}, {"nombre" : "GNAR PUMP House Music", "cantidad" : 12, "precio" : 100.00, "fecha" : "2019-11-28"}, {"nombre" : "Esteroides", "cantidad" : 23, "precio" : 1050.00, "fecha" : "2019-11-28"}, {"nombre" : "WHEY protein Vainilla", "cantidad" : 48, "precio" : 130.00, "fecha" : "2019-11-28"}, {"nombre" : "WHEY protein Cookies and Cream", "cantidad" : 33, "precio" : 200.00, "fecha" : "2019-11-28"}, {"nombre" : "Zapatos adidas", "cantidad" : 8, "precio" : 300.00, "fecha" : "2019-11-28"}, {"nombre" : "Polera nike", "cantidad" : 78, "precio" : 70.00, "fecha" : "2019-11-28"}]}, 
- {"nombre":"Gym de Caña 3","paquetes":[{"nombre" : "WHEY protein Cookies and Cream", "cantidad" : 23, "precio" : 200.00, "fecha" : "2019-11-28"}, {"nombre" : "WHEY protein Vainilla", "cantidad" : 18, "precio" : 130.00, "fecha" : "2019-11-28"}, {"nombre" : "GNAR PUMP House Music", "cantidad" : 34, "precio" : 100.00, "fecha" : "2019-11-28"}, {"nombre" : "Polera rebook", "cantidad" : 34, "precio" : 80.00, "fecha" : "2019-11-28"}, {"nombre" : "Esteroides", "cantidad" : 76, "precio" : 1050.00, "fecha" : "2019-11-28"}, {"nombre" : "Zapatos adidas", "cantidad" : 73, "precio" : 300.00, "fecha" : "2019-11-28"}, {"nombre" : "Guante Box 14oz", "cantidad" : 33, "precio" : 230.00, "fecha" : "2019-11-28"}]}]"
