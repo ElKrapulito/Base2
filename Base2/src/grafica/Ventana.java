@@ -5,13 +5,17 @@
  */
 package grafica;
 
-import java.awt.image.BufferedImage;
+import Conexion.Queries;
+import dao.FactoryDao;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.Calendar;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import tablas.*;
 
 /**
  *
@@ -19,12 +23,84 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class Ventana extends javax.swing.JFrame {
 
+    private FactoryDao factory;
+    private Queries q;
+
     //private BufferedImage imagen;
     public Ventana() throws IOException {
         initComponents();
         this.setLocationRelativeTo(null);
+        factory = FactoryDao.getFactory();
+        q = new Queries();
         //imagen = ImageIO.read(Ventana.class.getResource("/boton-salir-png-5.png"));
 
+    }
+
+    private void listaClientes() {
+        List<Cliente> clientitos = factory.getClientesDao().get();
+        String[] columns = {"Codigo", "Nombre", "Apellidos", "Fecha", "Usuario", "Contra"};
+        Object[] obj = new Object[6];
+        DefaultTableModel modelo = new DefaultTableModel(columns, 0);
+        modelo.setNumRows(0);
+        for (int i = 0; i < clientitos.size(); i++) {
+            obj[0] = clientitos.get(i).getCodigo();
+            obj[1] = clientitos.get(i).getNombre();
+            obj[2] = clientitos.get(i).getApellidos();
+            obj[3] = clientitos.get(i).getFecha();
+            obj[4] = clientitos.get(i).getUsuario();
+            obj[5] = clientitos.get(i).getContra();
+            modelo.addRow(obj);
+        }
+        TablaClientes.setModel(modelo);
+    }
+
+    private void listaProductos() {
+        List<Producto> productitos = factory.getProductosDao().get();
+        String[] columns = {"Codigo", "Nombre", "Precio", "IMG"};
+        Object[] obj = new Object[4];
+        DefaultTableModel modelo = new DefaultTableModel(columns, 0);
+        modelo.setNumRows(0);
+        for (int i = 0; i < productitos.size(); i++) {
+            obj[0] = productitos.get(i).getCodigo();
+            obj[1] = productitos.get(i).getNombre();
+            obj[2] = productitos.get(i).getPrecio();
+            obj[3] = "Imagencita";
+
+            modelo.addRow(obj);
+        }
+        TablaProductos.setModel(modelo);
+
+    }
+
+    private void listaEmpleados() {
+        List<Empleado> empleaditos = factory.getEmpleadosDao().get();
+        String[] columns = {"Codigo", "Nombre", "Apellido", "Fecha", "Usuario", "Salario"};
+        Object[] obj = new Object[6];
+        DefaultTableModel modelo = new DefaultTableModel(columns, 0);
+        modelo.setNumRows(0);
+        for (int i = 0; i < empleaditos.size(); i++) {
+            obj[0] = empleaditos.get(i).getCodigo();
+            obj[1] = empleaditos.get(i).getNombre();
+            obj[2] = empleaditos.get(i).getApellidos();
+            obj[3] = empleaditos.get(i).getFecha();
+            obj[4] = empleaditos.get(i).getUsuario();
+            obj[5] = empleaditos.get(i).getSalario();
+
+            modelo.addRow(obj);
+        }
+        TablaAdmin.setModel(modelo);
+    }
+
+    //ins_upd_empleado(fecha_nac date, snombre text, sapellido text,
+    //carnet text,surcusal int,labor text,Salario decimal(9,2))
+    private void insertar_actualizar_empleado(Empleado e) {
+        q.insertar_actualizar_empleado(e);
+    }
+
+    //ins_upd_cliente(fecha_nac date, snombre text, sapellido text,
+    //carnet text,surcusal int,permitido boolean)
+    public void insertar_actualizar_cliente(Cliente c) {
+        q.insertar_actualizar_cliente(c);
     }
 
     @SuppressWarnings("unchecked")
@@ -42,8 +118,8 @@ public class Ventana extends javax.swing.JFrame {
         PanelRegistrarClientes = new javax.swing.JPanel();
         btnAtrasRegistroClientes = new javax.swing.JButton();
         txtApellidoReg = new javax.swing.JTextField();
-        jComboBox3 = new javax.swing.JComboBox<>();
-        jComboBox4 = new javax.swing.JComboBox<>();
+        comboDiaCliente = new javax.swing.JComboBox<>();
+        comboMesCliente = new javax.swing.JComboBox<>();
         ComboAnhoCliente = new javax.swing.JComboBox<>();
         lblCIReg2 = new javax.swing.JLabel();
         lblApellidoReg = new javax.swing.JLabel();
@@ -51,11 +127,15 @@ public class Ventana extends javax.swing.JFrame {
         txtCorreoReg = new javax.swing.JTextField();
         lblCorreroReg = new javax.swing.JLabel();
         txtCIReg = new javax.swing.JTextField();
+        CheckBoxPermitido = new javax.swing.JCheckBox();
         lblNombreReg = new javax.swing.JLabel();
         txtNombreReg = new javax.swing.JTextField();
         btnRegCliente = new javax.swing.JButton();
+        lblSucursalClientes = new javax.swing.JLabel();
+        ComboRegistroClientes = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
         PanelClientes = new javax.swing.JPanel();
         btnAtrasClientes = new javax.swing.JButton();
         btnBuscarCliente = new javax.swing.JButton();
@@ -65,19 +145,19 @@ public class Ventana extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         PanelEmpleados = new javax.swing.JPanel();
-        btnAtrasEmpleados1 = new javax.swing.JButton();
+        btnRegistrarEntrada = new javax.swing.JButton();
         btnAtrasEmpleados = new javax.swing.JButton();
         txtPassEntrada = new javax.swing.JPasswordField();
         jScrollEmpleados = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        TablaEmpleados = new javax.swing.JTable();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         PanelProductos = new javax.swing.JPanel();
         txtBuscarProducto = new javax.swing.JTextField();
-        btnBusacrProducto = new javax.swing.JButton();
+        btnBuscarProducto = new javax.swing.JButton();
         btnAtrasProductos = new javax.swing.JButton();
         jScrollProductos = new javax.swing.JScrollPane();
-        jTableProductos = new javax.swing.JTable();
+        TablaProductos = new javax.swing.JTable();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         PanelAdministrador = new javax.swing.JPanel();
@@ -93,10 +173,14 @@ public class Ventana extends javax.swing.JFrame {
         txtNombreRegAdmin = new javax.swing.JTextField();
         txtApellidoRegAdmin = new javax.swing.JTextField();
         txtCorreoRegAdmin = new javax.swing.JTextField();
+        txtSalarioRegistroEmpleado = new javax.swing.JTextField();
         txtCIRegAdmin = new javax.swing.JTextField();
         ComboAnhoEmpleado = new javax.swing.JComboBox<>();
         ComboMesEmpleado = new javax.swing.JComboBox<>();
         ComboDiaEmpleado = new javax.swing.JComboBox<>();
+        ComboRegistroEmpleado = new javax.swing.JComboBox<>();
+        lblSalario = new javax.swing.JLabel();
+        lblSucursalEmpleados = new javax.swing.JLabel();
         lblCIReg3 = new javax.swing.JLabel();
         lblApellidoReg1 = new javax.swing.JLabel();
         lblCIReg1 = new javax.swing.JLabel();
@@ -116,6 +200,15 @@ public class Ventana extends javax.swing.JFrame {
         TablaAdmin = new javax.swing.JTable();
         jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
+        PanelAnhadirProductoAdmin = new javax.swing.JPanel();
+        btnAnhadirProductoAdmin = new javax.swing.JButton();
+        btnSalirProductoAdmin = new javax.swing.JButton();
+        txtNombreAnhadirProductoAdmin = new javax.swing.JTextField();
+        lblNombreReg2 = new javax.swing.JLabel();
+        lblCorreroReg2 = new javax.swing.JLabel();
+        txtPrecioProductoAdmin = new javax.swing.JTextField();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
         PanelLogin = new javax.swing.JPanel();
         lblPass = new javax.swing.JLabel();
         txtPass = new javax.swing.JPasswordField();
@@ -204,65 +297,90 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
         PanelRegistrarClientes.add(btnAtrasRegistroClientes, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 30, 90, 30));
-        PanelRegistrarClientes.add(txtApellidoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 200, -1));
+        PanelRegistrarClientes.add(txtApellidoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, 200, -1));
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
-        PanelRegistrarClientes.add(jComboBox3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 340, 50, -1));
+        comboDiaCliente.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
+        PanelRegistrarClientes.add(comboDiaCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 290, 50, -1));
 
-        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }));
-        PanelRegistrarClientes.add(jComboBox4, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 340, 50, -1));
+        comboMesCliente.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }));
+        PanelRegistrarClientes.add(comboMesCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 290, 50, -1));
 
         ComboAnhoCliente.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ComboAnhoClienteActionPerformed(evt);
             }
         });
-        PanelRegistrarClientes.add(ComboAnhoCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 340, 70, -1));
+        PanelRegistrarClientes.add(ComboAnhoCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 290, 70, -1));
 
         lblCIReg2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCIReg2.setForeground(new java.awt.Color(255, 255, 255));
         lblCIReg2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCIReg2.setText("Fecha nacimiento:");
-        PanelRegistrarClientes.add(lblCIReg2, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 340, 140, -1));
+        PanelRegistrarClientes.add(lblCIReg2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, 140, -1));
 
         lblApellidoReg.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblApellidoReg.setForeground(new java.awt.Color(255, 255, 255));
         lblApellidoReg.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblApellidoReg.setText("Apellido:");
-        PanelRegistrarClientes.add(lblApellidoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, 70, -1));
+        PanelRegistrarClientes.add(lblApellidoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 160, 70, -1));
 
         lblCIReg.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCIReg.setForeground(new java.awt.Color(255, 255, 255));
         lblCIReg.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCIReg.setText("CI:");
-        PanelRegistrarClientes.add(lblCIReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 290, 70, -1));
-        PanelRegistrarClientes.add(txtCorreoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 250, 200, -1));
+        PanelRegistrarClientes.add(lblCIReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 240, 70, -1));
+        PanelRegistrarClientes.add(txtCorreoReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 200, -1));
 
         lblCorreroReg.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCorreroReg.setForeground(new java.awt.Color(255, 255, 255));
         lblCorreroReg.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCorreroReg.setText("Correo:");
-        PanelRegistrarClientes.add(lblCorreroReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 250, 70, -1));
-        PanelRegistrarClientes.add(txtCIReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 290, 200, -1));
+        PanelRegistrarClientes.add(lblCorreroReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 200, 70, -1));
+        PanelRegistrarClientes.add(txtCIReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 240, 200, -1));
+
+        CheckBoxPermitido.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        CheckBoxPermitido.setText("Ingreso a otras sucursales");
+        CheckBoxPermitido.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CheckBoxPermitidoActionPerformed(evt);
+            }
+        });
+        PanelRegistrarClientes.add(CheckBoxPermitido, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 350, -1, -1));
 
         lblNombreReg.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblNombreReg.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreReg.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblNombreReg.setText("Nombre:");
-        PanelRegistrarClientes.add(lblNombreReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 170, 70, -1));
-        PanelRegistrarClientes.add(txtNombreReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 170, 200, -1));
+        PanelRegistrarClientes.add(lblNombreReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 120, 70, -1));
+        PanelRegistrarClientes.add(txtNombreReg, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 120, 200, -1));
 
         btnRegCliente.setBackground(new java.awt.Color(0, 0, 0));
         btnRegCliente.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btnRegCliente.setForeground(new java.awt.Color(255, 255, 255));
         btnRegCliente.setText("Registrar");
+        btnRegCliente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegClienteActionPerformed(evt);
+            }
+        });
         PanelRegistrarClientes.add(btnRegCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 380, 110, -1));
+
+        lblSucursalClientes.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblSucursalClientes.setForeground(new java.awt.Color(255, 255, 255));
+        lblSucursalClientes.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSucursalClientes.setText("Sucursal:");
+        PanelRegistrarClientes.add(lblSucursalClientes, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 350, 140, -1));
+
+        PanelRegistrarClientes.add(ComboRegistroClientes, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 350, 50, -1));
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/logo.png"))); // NOI18N
         PanelRegistrarClientes.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 60, -1, -1));
 
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/bw-background-1.jpg"))); // NOI18N
         PanelRegistrarClientes.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 440));
+
+        jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/bw-background-1.jpg"))); // NOI18N
+        PanelRegistrarClientes.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 440));
 
         PanelClientes.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -330,16 +448,16 @@ public class Ventana extends javax.swing.JFrame {
 
         PanelEmpleados.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        btnAtrasEmpleados1.setBackground(new java.awt.Color(0, 0, 0));
-        btnAtrasEmpleados1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnAtrasEmpleados1.setForeground(new java.awt.Color(255, 255, 255));
-        btnAtrasEmpleados1.setText("Registrar entrada");
-        btnAtrasEmpleados1.addActionListener(new java.awt.event.ActionListener() {
+        btnRegistrarEntrada.setBackground(new java.awt.Color(0, 0, 0));
+        btnRegistrarEntrada.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnRegistrarEntrada.setForeground(new java.awt.Color(255, 255, 255));
+        btnRegistrarEntrada.setText("Registrar entrada");
+        btnRegistrarEntrada.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAtrasEmpleados1ActionPerformed(evt);
+                btnRegistrarEntradaActionPerformed(evt);
             }
         });
-        PanelEmpleados.add(btnAtrasEmpleados1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 90, 160, 30));
+        PanelEmpleados.add(btnRegistrarEntrada, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 90, 160, 30));
 
         btnAtrasEmpleados.setBackground(new java.awt.Color(0, 0, 0));
         btnAtrasEmpleados.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -358,7 +476,7 @@ public class Ventana extends javax.swing.JFrame {
         jScrollEmpleados.setBackground(new java.awt.Color(102, 102, 102));
         jScrollEmpleados.setBorder(null);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        TablaEmpleados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -377,12 +495,12 @@ public class Ventana extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollEmpleados.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(2).setHeaderValue("Apellidos");
-            jTable1.getColumnModel().getColumn(3).setHeaderValue("Labor");
-            jTable1.getColumnModel().getColumn(4).setHeaderValue("Entrada");
-            jTable1.getColumnModel().getColumn(5).setHeaderValue("Salida");
+        jScrollEmpleados.setViewportView(TablaEmpleados);
+        if (TablaEmpleados.getColumnModel().getColumnCount() > 0) {
+            TablaEmpleados.getColumnModel().getColumn(2).setHeaderValue("Apellidos");
+            TablaEmpleados.getColumnModel().getColumn(3).setHeaderValue("Labor");
+            TablaEmpleados.getColumnModel().getColumn(4).setHeaderValue("Entrada");
+            TablaEmpleados.getColumnModel().getColumn(5).setHeaderValue("Salida");
         }
 
         PanelEmpleados.add(jScrollEmpleados, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 740, 260));
@@ -403,16 +521,16 @@ public class Ventana extends javax.swing.JFrame {
         });
         PanelProductos.add(txtBuscarProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 100, 460, 30));
 
-        btnBusacrProducto.setBackground(new java.awt.Color(0, 0, 0));
-        btnBusacrProducto.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        btnBusacrProducto.setForeground(new java.awt.Color(255, 255, 255));
-        btnBusacrProducto.setText("Buscar");
-        btnBusacrProducto.addActionListener(new java.awt.event.ActionListener() {
+        btnBuscarProducto.setBackground(new java.awt.Color(0, 0, 0));
+        btnBuscarProducto.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnBuscarProducto.setForeground(new java.awt.Color(255, 255, 255));
+        btnBuscarProducto.setText("Buscar");
+        btnBuscarProducto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBusacrProductoActionPerformed(evt);
+                btnBuscarProductoActionPerformed(evt);
             }
         });
-        PanelProductos.add(btnBusacrProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 90, 30));
+        PanelProductos.add(btnBuscarProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 90, 30));
 
         btnAtrasProductos.setBackground(new java.awt.Color(0, 0, 0));
         btnAtrasProductos.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -428,7 +546,7 @@ public class Ventana extends javax.swing.JFrame {
         jScrollProductos.setBackground(new java.awt.Color(102, 102, 102));
         jScrollProductos.setBorder(null);
 
-        jTableProductos.setModel(new javax.swing.table.DefaultTableModel(
+        TablaProductos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null},
                 {null, null},
@@ -447,7 +565,7 @@ public class Ventana extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollProductos.setViewportView(jTableProductos);
+        jScrollProductos.setViewportView(TablaProductos);
 
         PanelProductos.add(jScrollProductos, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 740, 260));
 
@@ -532,20 +650,21 @@ public class Ventana extends javax.swing.JFrame {
             }
         });
         PanelRegistrarEmpleados.add(btnSalirAdministrador1, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 30, 90, 30));
-        PanelRegistrarEmpleados.add(txtNombreRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 170, 200, -1));
-        PanelRegistrarEmpleados.add(txtApellidoRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 200, -1));
-        PanelRegistrarEmpleados.add(txtCorreoRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 250, 200, -1));
-        PanelRegistrarEmpleados.add(txtCIRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 290, 200, -1));
+        PanelRegistrarEmpleados.add(txtNombreRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 90, 200, -1));
+        PanelRegistrarEmpleados.add(txtApellidoRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 130, 200, -1));
+        PanelRegistrarEmpleados.add(txtCorreoRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 170, 200, -1));
+        PanelRegistrarEmpleados.add(txtSalarioRegistroEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 350, 200, -1));
+        PanelRegistrarEmpleados.add(txtCIRegAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 210, 200, -1));
 
         ComboAnhoEmpleado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ComboAnhoEmpleadoActionPerformed(evt);
             }
         });
-        PanelRegistrarEmpleados.add(ComboAnhoEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 340, 70, -1));
+        PanelRegistrarEmpleados.add(ComboAnhoEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 260, 70, -1));
 
         ComboMesEmpleado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }));
-        PanelRegistrarEmpleados.add(ComboMesEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 340, 50, -1));
+        PanelRegistrarEmpleados.add(ComboMesEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 260, 50, -1));
 
         ComboDiaEmpleado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" }));
         ComboDiaEmpleado.addActionListener(new java.awt.event.ActionListener() {
@@ -553,37 +672,51 @@ public class Ventana extends javax.swing.JFrame {
                 ComboDiaEmpleadoActionPerformed(evt);
             }
         });
-        PanelRegistrarEmpleados.add(ComboDiaEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 340, 50, -1));
+        PanelRegistrarEmpleados.add(ComboDiaEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 260, 50, -1));
+
+        PanelRegistrarEmpleados.add(ComboRegistroEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 310, 50, -1));
+
+        lblSalario.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblSalario.setForeground(new java.awt.Color(255, 255, 255));
+        lblSalario.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSalario.setText("Salario:");
+        PanelRegistrarEmpleados.add(lblSalario, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 350, 140, -1));
+
+        lblSucursalEmpleados.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblSucursalEmpleados.setForeground(new java.awt.Color(255, 255, 255));
+        lblSucursalEmpleados.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSucursalEmpleados.setText("Sucursal:");
+        PanelRegistrarEmpleados.add(lblSucursalEmpleados, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 310, 140, -1));
 
         lblCIReg3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCIReg3.setForeground(new java.awt.Color(255, 255, 255));
         lblCIReg3.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCIReg3.setText("Fecha nacimiento:");
-        PanelRegistrarEmpleados.add(lblCIReg3, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 340, 140, -1));
+        PanelRegistrarEmpleados.add(lblCIReg3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 260, 140, -1));
 
         lblApellidoReg1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblApellidoReg1.setForeground(new java.awt.Color(255, 255, 255));
         lblApellidoReg1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblApellidoReg1.setText("Apellido:");
-        PanelRegistrarEmpleados.add(lblApellidoReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, 70, -1));
+        PanelRegistrarEmpleados.add(lblApellidoReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 130, 70, -1));
 
         lblCIReg1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCIReg1.setForeground(new java.awt.Color(255, 255, 255));
         lblCIReg1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCIReg1.setText("CI:");
-        PanelRegistrarEmpleados.add(lblCIReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 290, 70, -1));
+        PanelRegistrarEmpleados.add(lblCIReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, 70, -1));
 
         lblCorreroReg1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblCorreroReg1.setForeground(new java.awt.Color(255, 255, 255));
         lblCorreroReg1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCorreroReg1.setText("Correo:");
-        PanelRegistrarEmpleados.add(lblCorreroReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 250, 70, -1));
+        PanelRegistrarEmpleados.add(lblCorreroReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 170, 70, -1));
 
         lblNombreReg1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         lblNombreReg1.setForeground(new java.awt.Color(255, 255, 255));
         lblNombreReg1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblNombreReg1.setText("Nombre:");
-        PanelRegistrarEmpleados.add(lblNombreReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 170, 70, -1));
+        PanelRegistrarEmpleados.add(lblNombreReg1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 90, 70, -1));
 
         btnRegEmpleado.setBackground(new java.awt.Color(0, 0, 0));
         btnRegEmpleado.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
@@ -666,6 +799,50 @@ public class Ventana extends javax.swing.JFrame {
 
         jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/bw-background-1.jpg"))); // NOI18N
         PanelBuscarAdmin.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 440));
+
+        PanelAnhadirProductoAdmin.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        btnAnhadirProductoAdmin.setBackground(new java.awt.Color(0, 0, 0));
+        btnAnhadirProductoAdmin.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnAnhadirProductoAdmin.setForeground(new java.awt.Color(255, 255, 255));
+        btnAnhadirProductoAdmin.setText("Anhadir");
+        btnAnhadirProductoAdmin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAnhadirProductoAdminActionPerformed(evt);
+            }
+        });
+        PanelAnhadirProductoAdmin.add(btnAnhadirProductoAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 310, 90, 30));
+
+        btnSalirProductoAdmin.setBackground(new java.awt.Color(0, 0, 0));
+        btnSalirProductoAdmin.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        btnSalirProductoAdmin.setForeground(new java.awt.Color(255, 255, 255));
+        btnSalirProductoAdmin.setText("Salir");
+        btnSalirProductoAdmin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirProductoAdminActionPerformed(evt);
+            }
+        });
+        PanelAnhadirProductoAdmin.add(btnSalirProductoAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 30, 90, 30));
+        PanelAnhadirProductoAdmin.add(txtNombreAnhadirProductoAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 130, 200, -1));
+
+        lblNombreReg2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblNombreReg2.setForeground(new java.awt.Color(255, 255, 255));
+        lblNombreReg2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblNombreReg2.setText("Nombre:");
+        PanelAnhadirProductoAdmin.add(lblNombreReg2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 130, 70, -1));
+
+        lblCorreroReg2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        lblCorreroReg2.setForeground(new java.awt.Color(255, 255, 255));
+        lblCorreroReg2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblCorreroReg2.setText("Precio:");
+        PanelAnhadirProductoAdmin.add(lblCorreroReg2, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 180, 70, -1));
+        PanelAnhadirProductoAdmin.add(txtPrecioProductoAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 180, 200, -1));
+
+        jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/logo.png"))); // NOI18N
+        PanelAnhadirProductoAdmin.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 60, -1, -1));
+
+        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/imagenes/bw-background-1.jpg"))); // NOI18N
+        PanelAnhadirProductoAdmin.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 440));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -775,6 +952,7 @@ public class Ventana extends javax.swing.JFrame {
         ScrollClientes.setOpaque(false);
         ScrollClientes.getViewport().setOpaque(false);
         PanelClientes.setVisible(true);
+        listaClientes();
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnProductosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductosActionPerformed
@@ -784,6 +962,7 @@ public class Ventana extends javax.swing.JFrame {
         getContentPane().add(PanelProductos, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 443));
         jScrollProductos.setOpaque(false);
         jScrollProductos.getViewport().setOpaque(false);
+        listaProductos();
         PanelProductos.setVisible(true);
     }//GEN-LAST:event_btnProductosActionPerformed
 
@@ -805,7 +984,13 @@ public class Ventana extends javax.swing.JFrame {
         getContentPane().add(PanelRegistrarClientes, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 443));
         int year = (Calendar.getInstance()).get(Calendar.YEAR);
         for (int i = 1950; i <= year; i++) {
-            ComboAnhoCliente.addItem(i+"");
+            ComboAnhoCliente.addItem(i + "");
+        }
+
+        int cantidadSucursales = factory.getSucursalesDao().get().size();
+        System.out.println("Cantidad: " + cantidadSucursales);
+        for (int i = 0; i < cantidadSucursales; i++) {
+            ComboRegistroClientes.addItem("" + (i + 1));
         }
         PanelRegistrarClientes.setVisible(true);
     }//GEN-LAST:event_btnRegActionPerformed
@@ -844,13 +1029,13 @@ public class Ventana extends javax.swing.JFrame {
         PanelInicio.setVisible(true);
     }//GEN-LAST:event_btnAtrasProductosActionPerformed
 
-    private void btnAtrasEmpleados1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtrasEmpleados1ActionPerformed
+    private void btnRegistrarEntradaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarEntradaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnAtrasEmpleados1ActionPerformed
+    }//GEN-LAST:event_btnRegistrarEntradaActionPerformed
 
-    private void btnBusacrProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusacrProductoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnBusacrProductoActionPerformed
+    private void btnBuscarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarProductoActionPerformed
+         
+    }//GEN-LAST:event_btnBuscarProductoActionPerformed
 
     private void txtBuscarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarProductoActionPerformed
         // TODO add your handling code here:
@@ -869,9 +1054,14 @@ public class Ventana extends javax.swing.JFrame {
         this.setSize(780, 443);
         this.setLocationRelativeTo(null);
         getContentPane().add(PanelRegistrarEmpleados, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 443));
-        int year = ((Calendar.getInstance()).get(Calendar.YEAR))-18;
+        int year = ((Calendar.getInstance()).get(Calendar.YEAR)) - 18;
         for (int i = 1950; i <= year; i++) {
-            ComboAnhoEmpleado.addItem(i+"");
+            ComboAnhoEmpleado.addItem(i + "");
+        }
+
+        int cantidadSucursales = factory.getSucursalesDao().get().size();
+        for (int i = 0; i < cantidadSucursales; i++) {
+            ComboRegistroEmpleado.addItem("" + (i + 1));
         }
         PanelRegistrarEmpleados.setVisible(true);
     }//GEN-LAST:event_btnRegAdministradorActionPerformed
@@ -889,13 +1079,18 @@ public class Ventana extends javax.swing.JFrame {
         ScrollAdmin.getViewport().setOpaque(false);
         int year = (Calendar.getInstance()).get(Calendar.YEAR);
         for (int i = 2015; i <= year; i++) {
-            jComboAnhoAdmin.addItem(i+"");
+            jComboAnhoAdmin.addItem(i + "");
         }
+        listaEmpleados();
         PanelBuscarAdmin.setVisible(true);
     }//GEN-LAST:event_btnBuscarAdministradorActionPerformed
 
     private void btnProductos1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProductos1ActionPerformed
-        // TODO add your handling code here:
+        PanelAdministrador.setVisible(false);
+        this.setSize(780, 443);
+        this.setLocationRelativeTo(null);
+        getContentPane().add(PanelAnhadirProductoAdmin, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 443));
+        PanelAnhadirProductoAdmin.setVisible(true);
     }//GEN-LAST:event_btnProductos1ActionPerformed
 
     private void btnSalirAdministrador1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirAdministrador1ActionPerformed
@@ -937,11 +1132,120 @@ public class Ventana extends javax.swing.JFrame {
     private void btnRegEmpleadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegEmpleadoActionPerformed
         String fecha = ComboAnhoEmpleado.getSelectedItem() + " " + ComboMesEmpleado.getSelectedItem() + " " + ComboDiaEmpleado.getSelectedItem();
         System.out.println(txtNombreRegAdmin.getText() + "\n" + fecha);
+        Empleado e = new Empleado();
+
+        if (txtNombreRegAdmin != null) {
+            e.setNombre(txtNombreRegAdmin.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en nombre!");
+            return;
+        }
+        if (txtApellidoRegAdmin != null) {
+            e.setApellidos(txtApellidoRegAdmin.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Apellidos!");
+            return;
+        }
+        if (txtCIRegAdmin != null) {
+            e.setCi(txtCIRegAdmin.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Carnet de identidad!");
+            return;
+        }
+        if (ComboRegistroEmpleado != null) {
+            e.setSucursal_id(ComboRegistroEmpleado.getSelectedIndex());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Sucursal!");
+            return;
+        }
+        if (ComboAnhoEmpleado != null && ComboMesEmpleado != null && ComboDiaEmpleado != null) {
+            String s = ComboAnhoEmpleado.getSelectedItem().toString() + ComboMesEmpleado.getSelectedItem().toString() + ComboDiaEmpleado.getSelectedItem().toString();
+            System.out.println("Date: --- " +s);
+            Date dt = new Date(Long.parseLong(s));
+            e.setFecha(s);
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en fecha!");
+            return;
+        }
+
+        e.setDesc_labor("Trabajito ATP");
+
+        if (txtSalarioRegistroEmpleado != null) {
+            try {
+                e.setSalario(Float.parseFloat(txtSalarioRegistroEmpleado.getText()));
+            } catch (NumberFormatException x) {
+                JOptionPane.showMessageDialog(rootPane, "Error en Parseando el salario! " + x.getMessage());
+                return;
+            }
+        }
+
+        insertar_actualizar_empleado(e);
     }//GEN-LAST:event_btnRegEmpleadoActionPerformed
 
     private void ComboDiaEmpleadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboDiaEmpleadoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_ComboDiaEmpleadoActionPerformed
+
+    private void btnRegClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegClienteActionPerformed
+        Cliente e = new Cliente();
+
+        if (txtNombreReg != null) {
+            e.setNombre(txtNombreReg.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en nombre!");
+            return;
+        }
+        if (txtApellidoReg != null) {
+            e.setApellidos(txtApellidoReg.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Apellidos!");
+            return;
+        }
+        if (txtCIReg != null) {
+            e.setCi(txtCIReg.getText());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Carnet de identidad!");
+            return;
+        }
+        if (ComboRegistroClientes != null) {
+            e.setSucursal_id(ComboRegistroClientes.getSelectedIndex());
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en Sucursal!");
+            return;
+        }
+        if (ComboAnhoCliente != null && comboMesCliente != null && comboDiaCliente != null) {
+            String s = ComboAnhoCliente.getSelectedItem().toString() + comboMesCliente.getSelectedItem().toString() + comboDiaCliente.getSelectedItem().toString();
+            e.setFecha(s);
+        } else {
+            JOptionPane.showMessageDialog(rootPane, "Error en fecha!");
+            return;
+        }
+
+        if (CheckBoxPermitido.isSelected()) {
+            e.setPermitido(true);
+        } else {
+            e.setPermitido(false);
+        }
+
+        insertar_actualizar_cliente(e);
+
+    }//GEN-LAST:event_btnRegClienteActionPerformed
+
+    private void CheckBoxPermitidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CheckBoxPermitidoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CheckBoxPermitidoActionPerformed
+
+    private void btnSalirProductoAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirProductoAdminActionPerformed
+        PanelAnhadirProductoAdmin.setVisible(false);
+        this.setSize(780, 443);
+        this.setLocationRelativeTo(null);
+        getContentPane().add(PanelAdministrador, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 780, 443));
+        PanelAdministrador.setVisible(true);
+    }//GEN-LAST:event_btnSalirProductoAdminActionPerformed
+
+    private void btnAnhadirProductoAdminActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnhadirProductoAdminActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnAnhadirProductoAdminActionPerformed
 
     /**
      * @param args the command line arguments
@@ -983,11 +1287,15 @@ public class Ventana extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox CheckBoxPermitido;
     private javax.swing.JComboBox<String> ComboAnhoCliente;
     private javax.swing.JComboBox<String> ComboAnhoEmpleado;
     private javax.swing.JComboBox<String> ComboDiaEmpleado;
     private javax.swing.JComboBox<String> ComboMesEmpleado;
+    private javax.swing.JComboBox<String> ComboRegistroClientes;
+    private javax.swing.JComboBox<String> ComboRegistroEmpleado;
     private javax.swing.JPanel PanelAdministrador;
+    private javax.swing.JPanel PanelAnhadirProductoAdmin;
     private javax.swing.JPanel PanelBuscarAdmin;
     private javax.swing.JPanel PanelClientes;
     private javax.swing.JPanel PanelEmpleados;
@@ -1000,16 +1308,18 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JScrollPane ScrollClientes;
     private javax.swing.JTable TablaAdmin;
     private javax.swing.JTable TablaClientes;
+    private javax.swing.JTable TablaEmpleados;
+    private javax.swing.JTable TablaProductos;
+    private javax.swing.JButton btnAnhadirProductoAdmin;
     private javax.swing.JButton btnAtrasClientes;
     private javax.swing.JButton btnAtrasEmpleados;
-    private javax.swing.JButton btnAtrasEmpleados1;
     private javax.swing.JButton btnAtrasProductos;
     private javax.swing.JButton btnAtrasRegistroClientes;
-    private javax.swing.JButton btnBusacrProducto;
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnBuscarAdmin;
     private javax.swing.JButton btnBuscarAdministrador;
     private javax.swing.JButton btnBuscarCliente;
+    private javax.swing.JButton btnBuscarProducto;
     private javax.swing.JButton btnEmpleados;
     private javax.swing.JButton btnEmpleados1;
     private javax.swing.JButton btnExit;
@@ -1020,15 +1330,17 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JButton btnRegAdministrador;
     private javax.swing.JButton btnRegCliente;
     private javax.swing.JButton btnRegEmpleado;
+    private javax.swing.JButton btnRegistrarEntrada;
     private javax.swing.JButton btnSalir;
     private javax.swing.JButton btnSalirAdministrador;
     private javax.swing.JButton btnSalirAdministrador1;
     private javax.swing.JButton btnSalirAdministrador2;
+    private javax.swing.JButton btnSalirProductoAdmin;
+    private javax.swing.JComboBox<String> comboDiaCliente;
+    private javax.swing.JComboBox<String> comboMesCliente;
     private javax.swing.JComboBox<String> jComboAnhoAdmin;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
-    private javax.swing.JComboBox<String> jComboBox4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1039,7 +1351,10 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1049,8 +1364,6 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollEmpleados;
     private javax.swing.JScrollPane jScrollProductos;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTableProductos;
     private javax.swing.JLabel lblApellidoReg;
     private javax.swing.JLabel lblApellidoReg1;
     private javax.swing.JLabel lblCIReg;
@@ -1059,10 +1372,15 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JLabel lblCIReg3;
     private javax.swing.JLabel lblCorreroReg;
     private javax.swing.JLabel lblCorreroReg1;
+    private javax.swing.JLabel lblCorreroReg2;
     private javax.swing.JLabel lblFondoBase;
     private javax.swing.JLabel lblNombreReg;
     private javax.swing.JLabel lblNombreReg1;
+    private javax.swing.JLabel lblNombreReg2;
     private javax.swing.JLabel lblPass;
+    private javax.swing.JLabel lblSalario;
+    private javax.swing.JLabel lblSucursalClientes;
+    private javax.swing.JLabel lblSucursalEmpleados;
     private javax.swing.JLabel lblUser;
     private javax.swing.JTextField txtApellidoReg;
     private javax.swing.JTextField txtApellidoRegAdmin;
@@ -1072,11 +1390,14 @@ public class Ventana extends javax.swing.JFrame {
     private javax.swing.JTextField txtCIRegAdmin;
     private javax.swing.JTextField txtCorreoReg;
     private javax.swing.JTextField txtCorreoRegAdmin;
+    private javax.swing.JTextField txtNombreAnhadirProductoAdmin;
     private javax.swing.JTextField txtNombreReg;
     private javax.swing.JTextField txtNombreRegAdmin;
     private javax.swing.JTextField txtNombreRegAdmin1;
     private javax.swing.JPasswordField txtPass;
     private javax.swing.JPasswordField txtPassEntrada;
+    private javax.swing.JTextField txtPrecioProductoAdmin;
+    private javax.swing.JTextField txtSalarioRegistroEmpleado;
     private javax.swing.JTextField txtUser;
     // End of variables declaration//GEN-END:variables
 }
