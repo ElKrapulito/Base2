@@ -10,8 +10,11 @@ CREATE TABLE personas(
     apellidos VARCHAR(50) NOT NULL,
     f_nacimiento DATE NOT NULL,
     n_usuario VARCHAR(30) NOT NULL,
-    contra TEXT NOT NULL
+    contra TEXT NOT NULL,
+	ci VARCHAR(30) 
 );
+ALTER TABLE personas
+ADD CONSTRAINT Cons_unic_user UNIQUE (n_usuario);
 
 CREATE TABLE clientes(
     codigo_id VARCHAR(30) PRIMARY KEY,
@@ -285,7 +288,7 @@ create or replace function generar_pass(fecha_nac date, nombre text, apellido te
 	LANGUAGE plpgsql;
 
 	--Primera crear la funcion que esta abajo para generar el codigo
-create or replace function generar_empleado(fecha_nac date, snombre text, sapellido text,
+create or replace function ins_upd_empleado(fecha_nac date, snombre text, sapellido text,
 		 carnet text,surcusal int,labor text,Salario decimal(9,2))
 	RETURNS void AS
 	$$
@@ -312,9 +315,9 @@ create or replace function generar_empleado(fecha_nac date, snombre text, sapell
 	$$
 	LANGUAGE plpgsql;
 
--- insertar o actualizar cliente
-    create or replace function ins_upd_persona(fecha_nac date, snombre text, sapellido text,
-		carnet text,surcusal int,permitido boolean)
+	-- con contraseña encriptada registro empleado
+	create or replace function ins_upd_empleado(fecha_nac date, snombre text, sapellido text,
+		 carnet text,surcusal int,labor text,Salario decimal(9,2))
 	RETURNS void AS
 	$$
 	declare
@@ -322,23 +325,82 @@ create or replace function generar_empleado(fecha_nac date, snombre text, sapell
 		pass varchar;
 		variable text;
 	BEGIN
-		pass :=(select generar_pass(fecha_nac,snombre,sapellido))::text;
 		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
 		select codigo_id from Personas where codigo_id = codigo into variable;
 		if(variable = codigo) then
 			update personas set nombre = snombre where codigo_id = codigo;
 			update personas set apellidos = sapellido where codigo_id = codigo;
 			update personas set n_usuario = codigo where codigo_id = codigo;
-			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;
-			update personas set contra = pass where codigo_id = codigo;
+			update personas set f_nacimiento = fecha_nac where codigo_id = codigo;			
+			update empleados set salario = Salario, desc_labor = labor,sucursal_id = sucursal;
+			
 		else
-			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, pass);	
-	        insert into clientes values(codigo,now()::date,surcusal,Permitido);
+			insert into personas values(codigo, snombre, sapellido, fecha_nac, codigo, encriptar_pass(pass));	
+	        insert into empleados values(codigo,Salario,labor,surcusal);
 		end if;
 	END;
 	$$
 	LANGUAGE plpgsql;
 
+	-- nuevo queri para registro 
+	SELECT * FROM personas NATURAL JOIN empleados
+	create or replace function ins_upd_empleado(
+	fecha_nac text, snombre text, sapellido text,
+		 carnet text,
+	surcusal int,
+	labor text,salary double precision)
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		pass := (select generar_pass(to_date(fecha_nac, 'YYYYmmdd')::date,snombre,sapellido));
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = to_date(fecha_nac, 'YYYYmmdd')::date where codigo_id = codigo;			
+			update empleados set salario = salary::decimal, desc_labor = labor,sucursal_id = sucursal where codigo_id = codigo;
+			
+		else
+			insert into personas values(codigo, snombre, sapellido, to_date(fecha_nac, 'YYYYmmdd')::date, codigo, encriptar_pass(pass));	
+	        insert into empleados values(codigo,salary::decimal,labor,surcusal);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+
+-- insertar o actualizar cliente NUEVOO!!
+    create or replace function ins_upd_cliente(fecha_nac text, snombre text, sapellido text,
+		carnet text,surcusal int,Permitido boolean)
+	RETURNS void AS
+	$$
+	declare
+		codigo varchar;
+		pass varchar;
+		variable text;
+	BEGIN
+		pass :=(select generar_pass(to_date(fecha_nac, 'YYYYmmdd')::date,snombre,sapellido))::text;
+		codigo := (select generar_codigo(carnet,snombre,sapellido))::text;
+		select codigo_id from Personas where codigo_id = codigo into variable;
+		if(variable = codigo) then
+			update personas set nombre = snombre where codigo_id = codigo;
+			update personas set apellidos = sapellido where codigo_id = codigo;
+			update personas set n_usuario = codigo where codigo_id = codigo;
+			update personas set f_nacimiento = to_date(fecha_nac, 'YYYYmmdd')::date where codigo_id = codigo;
+			update clientes SET sucursal_id = sucursal, permitido = Permitido where codigo_id = codigo;
+		else
+			insert into personas values(codigo, snombre, sapellido, to_date(fecha_nac, 'YYYYmmdd')::date, codigo, encriptar_pass(pass));	
+	        insert into clientes values(codigo,now()::date,surcusal,Permitido);
+		end if;
+	END;
+	$$
+	LANGUAGE plpgsql;
+	
 
 -- Crear una clave encriptada
 CREATE OR REPLACE FUNCTION encriptar_pass(pass text)
@@ -356,5 +418,6 @@ BEGIN
 	RETURN (contra = crypt(pass, contra)) AS pswmatch FROM personas WHERE n_usuario = usuario; 
 END;
 $$
+
 
  
